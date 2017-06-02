@@ -92,6 +92,15 @@ shinyServer(function(input, output) {
         )
     })
     
+    output$column_name_z_axis_selector <- renderUI({
+        
+        selectInput("column_select_z_axis", 
+                    label="Select a column to color the selector plot",  
+                    choices=names(raw.data()),
+                    selected=names(raw.data())[length(raw.data())]
+        )
+    })
+    
     output$column_name_x_axis_target <- renderUI({
         
         selectInput("column_target_x_axis", 
@@ -105,6 +114,15 @@ shinyServer(function(input, output) {
         
         selectInput("column_target_y_axis", 
                     label="Select a column to plot on y axis of target",  
+                    choices=names(raw.data()),
+                    selected=names(raw.data())[length(raw.data())]
+        )
+    })
+    
+    output$column_name_z_axis_target <- renderUI({
+        
+        selectInput("column_target_z_axis", 
+                    label="Select a column to plot on z axis of target",  
                     choices=names(raw.data()),
                     selected=names(raw.data())[length(raw.data())]
         )
@@ -128,15 +146,26 @@ shinyServer(function(input, output) {
         
         # get the plotting data (already pre-filtered by input$ parameters)
         plot.data <- raw.data()
-        plot.data <- plot.data[,c(input$column_select_x_axis, input$column_select_y_axis, input$column_target_x_axis, input$column_target_y_axis)]
+        plot.data <- plot.data[,c(input$column_select_x_axis, 
+                                  input$column_select_y_axis, 
+                                  input$column_select_z_axis, 
+                                  input$column_target_x_axis, 
+                                  input$column_target_y_axis,
+                                  input$column_target_z_axis)]
         
         if (is.null(plot.data) | is.null(input$column_select_x_axis) | is.null(input$column_select_y_axis)) { 
             return( empty_plot("not enough data...") )
         }
         
-        ggplot(data = plot.data,
-               aes_string(input$column_select_x_axis, input$column_select_y_axis)) +
-            geom_point()
+        if (!input$colorPlot){
+            ggplot(data = plot.data,
+                   aes_string(input$column_select_x_axis, input$column_select_y_axis)) +
+                geom_point()
+        } else {
+            ggplot(data = plot.data,
+                   aes_string(input$column_select_x_axis, input$column_select_y_axis, color=input$column_select_z_axis)) +
+                geom_point()
+        }
         
     })
     
@@ -145,12 +174,19 @@ shinyServer(function(input, output) {
         
         target.data <- brushedPoints(raw.data(), input$plot_brush)
         
-        if (is.null(target.data)) { 
+        if (is.null(target.data) | is.null(input$column_target_x_axis) | is.null(input$column_target_y_axis)) { 
             return( empty_plot("not enough data...") )
         }
         
-        ggplot(data = target.data,
-               aes_string(input$column_target_x_axis, input$column_target_y_axis)) +
-            geom_point()
+        if (!input$colorTargetPlot) {
+            ggplot(data = target.data,
+                   aes_string(input$column_target_x_axis, input$column_target_y_axis)) +
+                geom_point()
+        } else {
+            ggplot(data = target.data,
+                   aes_string(input$column_target_x_axis, input$column_target_y_axis, color=input$column_target_z_axis)) +
+                geom_point()
+        }
+        
     })
 })
