@@ -1,6 +1,8 @@
 # requirements to GatingPlotter
 
 - show Density Plot
+- be able to select, which experiment is shown in selector plot
+    - (to identify the control experiment and select on that)
 - show secondary plot and table by experiment 
     - facet_wrap?
     - DT table
