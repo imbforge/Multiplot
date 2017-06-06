@@ -23,21 +23,22 @@ shinyUI(fluidPage(
 #==============================================================================
                      tabPanel( "Plot",
                         # get the parameters to plot
-                        uiOutput("column_name_x_axis_selector"),
-                        uiOutput("column_name_y_axis_selector"),
+                        uiOutput("generate_column_name_x_axis_selector"),
+                        uiOutput("generate_column_name_y_axis_selector"),
                         checkboxInput("colorPlot", 
                                       "Use third column to colour selector", 
                                       value = FALSE),
-                        uiOutput("column_name_z_axis_selector"),
+                        uiOutput("generate_column_name_z_axis_selector"),
+                        uiOutput("generate_slider_z_axis_selector"),
                         
                         # here there should be a horizontal line
                         
-                        uiOutput("column_name_x_axis_target"),
-                        uiOutput("column_name_y_axis_target"),
+                        uiOutput("generate_column_name_x_axis_target"),
+                        uiOutput("generate_column_name_y_axis_target"),
                         checkboxInput("colorTargetPlot", 
                                       "Use third column to colour target", 
                                       value = FALSE),
-                        uiOutput("column_name_z_axis_target")
+                        uiOutput("generate_column_name_z_axis_target")
                         
                     
                      ) # end of plotting parameters

@@ -87,29 +87,35 @@ shinyServer(function(input, output) {
     
     # select, which column to plot (by name)
     
-    output$column_name_x_axis_selector <- column2plot(id = "column_select_x_axis",
+    output$generate_column_name_x_axis_selector <- column2plot(id = "column_select_x_axis",
                                                       label = "Select a column to plot on x axis of selector",
                                                       indata = raw.data())
     
-    output$column_name_y_axis_selector <- column2plot(id = "column_select_y_axis",
+    output$generate_column_name_y_axis_selector <- column2plot(id = "column_select_y_axis",
                                                       label = "Select a column to plot on y axis of selector",
                                                       indata = raw.data())
     
-    output$column_name_z_axis_selector <- column2plot(id = "column_select_z_axis",
+    output$generate_column_name_z_axis_selector <- column2plot(id = "column_select_z_axis",
                                                       label = "Select a column to colour points in selector",
                                                       indata = raw.data())
     
-    output$column_name_x_axis_target <- column2plot(id = "column_target_x_axis",
+    output$generate_column_name_x_axis_target <- column2plot(id = "column_target_x_axis",
                                                     label = "Select a column to plot on x axis of target",
                                                     indata = raw.data())
     
-    output$column_name_y_axis_target <- column2plot(id = "column_target_y_axis",
+    output$generate_column_name_y_axis_target <- column2plot(id = "column_target_y_axis",
                                                     label = "Select a column to plot on y axis of target",
                                                     indata = raw.data())
     
-    output$column_name_z_axis_target <- column2plot(id = "column_target_z_axis",
+    output$generate_column_name_z_axis_target <- column2plot(id = "column_target_z_axis",
                                                     label = "Select a column to colour points in target",
                                                     indata = raw.data())
+    
+    output$generate_slider_z_axis_selector <- reactive(sliderInput("slider_z_axis_selector", 
+                                                                   "Select range to colour points",
+                                                                   value = c(0,1), 
+                                                                   min = min(raw.data()[,input$column_select_z_axis]), 
+                                                                   max = max(raw.data()[,input$column_select_z_axis])))
     
     ##################
     # Plot functions #
