@@ -73,60 +73,43 @@ shinyServer(function(input, output) {
     # User Interface #
     ##################
     
+    # generate a drop down list from input data column names
+    column2plot <- function(id, label, indata) {
+        renderUI({
+            
+            selectInput(id, 
+                        label=label,  
+                        choices=names(indata),
+                        selected=names(indata)[length(indata)]
+            )
+        })
+    }
+    
     # select, which column to plot (by name)
-    output$column_name_x_axis_selector <- renderUI({
-        
-        selectInput("column_select_x_axis", 
-                    label="Select a column to plot on x axis of selector",  
-                    choices=names(raw.data()),
-                    selected=names(raw.data())[length(raw.data())]
-        )
-    })
     
-    output$column_name_y_axis_selector <- renderUI({
-        
-        selectInput("column_select_y_axis", 
-                    label="Select a column to plot on y axis of selector",  
-                    choices=names(raw.data()),
-                    selected=names(raw.data())[length(raw.data())]
-        )
-    })
+    output$column_name_x_axis_selector <- column2plot(id = "column_select_x_axis",
+                                                      label = "Select a column to plot on x axis of selector",
+                                                      indata = raw.data())
     
-    output$column_name_z_axis_selector <- renderUI({
-        
-        selectInput("column_select_z_axis", 
-                    label="Select a column to color the selector plot",  
-                    choices=names(raw.data()),
-                    selected=names(raw.data())[length(raw.data())]
-        )
-    })
+    output$column_name_y_axis_selector <- column2plot(id = "column_select_y_axis",
+                                                      label = "Select a column to plot on y axis of selector",
+                                                      indata = raw.data())
     
-    output$column_name_x_axis_target <- renderUI({
-        
-        selectInput("column_target_x_axis", 
-                    label="Select a column to plot on x axis of target",  
-                    choices=names(raw.data()),
-                    selected=names(raw.data())[length(raw.data())]
-        )
-    })
+    output$column_name_z_axis_selector <- column2plot(id = "column_select_z_axis",
+                                                      label = "Select a column to colour points in selector",
+                                                      indata = raw.data())
     
-    output$column_name_y_axis_target <- renderUI({
-        
-        selectInput("column_target_y_axis", 
-                    label="Select a column to plot on y axis of target",  
-                    choices=names(raw.data()),
-                    selected=names(raw.data())[length(raw.data())]
-        )
-    })
+    output$column_name_x_axis_target <- column2plot(id = "column_target_x_axis",
+                                                    label = "Select a column to plot on x axis of target",
+                                                    indata = raw.data())
     
-    output$column_name_z_axis_target <- renderUI({
-        
-        selectInput("column_target_z_axis", 
-                    label="Select a column to plot on z axis of target",  
-                    choices=names(raw.data()),
-                    selected=names(raw.data())[length(raw.data())]
-        )
-    })
+    output$column_name_y_axis_target <- column2plot(id = "column_target_y_axis",
+                                                    label = "Select a column to plot on y axis of target",
+                                                    indata = raw.data())
+    
+    output$column_name_z_axis_target <- column2plot(id = "column_target_z_axis",
+                                                    label = "Select a column to colour points in target",
+                                                    indata = raw.data())
     
     ##################
     # Plot functions #
@@ -153,10 +136,12 @@ shinyServer(function(input, output) {
                                   input$column_target_y_axis,
                                   input$column_target_z_axis)]
         
+        # get an empty plot, if no data are available
         if (is.null(plot.data) | is.null(input$column_select_x_axis) | is.null(input$column_select_y_axis)) { 
             return( empty_plot("not enough data...") )
         }
         
+        # plot either with colouring of points or not - depending on seelcted z axis
         if (!input$colorPlot){
             ggplot(data = plot.data,
                    aes_string(input$column_select_x_axis, input$column_select_y_axis)) +
@@ -174,10 +159,12 @@ shinyServer(function(input, output) {
         
         target.data <- brushedPoints(raw.data(), input$plot_brush)
         
+        # empty plot, if no data is selected
         if (is.null(target.data) | is.null(input$column_target_x_axis) | is.null(input$column_target_y_axis)) { 
             return( empty_plot("not enough data...") )
         }
         
+        # plot selected data either with coloured points (by z axis) or not
         if (!input$colorTargetPlot) {
             ggplot(data = target.data,
                    aes_string(input$column_target_x_axis, input$column_target_y_axis)) +
