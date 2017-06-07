@@ -32,7 +32,12 @@ shinyUI(fluidPage(
                                       "Use third column to colour selector", 
                                       value = FALSE),
                         uiOutput("generate_column_name_z_axis_selector"),
-                        uiOutput("generate_slider_z_axis_selector"),
+                        
+                        checkboxInput("controlExperimentCheck",
+                                      "Use only one experiment as control for gating",
+                                      value = FALSE),
+                        uiOutput("generate_column_control_experiment"),
+                        # uiOutput("generate_slider_z_axis_selector"),
                         
                         # here there should be a horizontal line
                         

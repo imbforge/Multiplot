@@ -130,6 +130,13 @@ shinyServer(function(input, output) {
                                                       label = "Select a column to colour points in selector",
                                                       indata = all.data())
     
+    output$generate_column_control_experiment <- renderUI({
+                                                    selectInput("control_experiment",
+                                                                label = "Select an experiment as control",
+                                                                choices = all.data()$experiment,
+                                                                selected = all.data()$experiment[1])
+                                                    })
+    
     output$generate_column_name_x_axis_target <- column2plot(id = "column_target_x_axis",
                                                     label = "Select a column to plot on x axis of target",
                                                     indata = all.data())
@@ -141,6 +148,8 @@ shinyServer(function(input, output) {
     output$generate_column_name_z_axis_target <- column2plot(id = "column_target_z_axis",
                                                     label = "Select a column to colour points in target",
                                                     indata = all.data())
+    
+    
     
     # output$generate_slider_z_axis_selector <- observe(sliderInput("slider_z_axis_selector", 
     #                                                                "Select range to colour points",
@@ -166,12 +175,18 @@ shinyServer(function(input, output) {
         
         # get the plotting data (already pre-filtered by input$ parameters)
         plot.data <- all.data()
-        plot.data <- plot.data[,c(input$column_select_x_axis, 
+        plot.data <- plot.data[,c("experiment",
+                                  input$column_select_x_axis, 
                                   input$column_select_y_axis, 
                                   input$column_select_z_axis, 
                                   input$column_target_x_axis, 
                                   input$column_target_y_axis,
                                   input$column_target_z_axis)]
+        
+        # only one experiment is to be used, filter now...
+        if (input$controlExperimentCheck) {
+            plot.data <- plot.data[plot.data$experiment == input$control_experiment, ]
+        }
         
         # get an empty plot, if no data are available
         if (is.null(plot.data) | is.null(input$column_select_x_axis) | is.null(input$column_select_y_axis)) { 
