@@ -186,7 +186,8 @@ shinyServer(function(input, output) {
         } else {
             ggplot(data = plot.data,
                    aes_string(input$column_select_x_axis, input$column_select_y_axis, color=input$column_select_z_axis)) +
-                geom_point()
+                geom_point() +
+                theme(legend.position = "bottom")
         }
         
     })
