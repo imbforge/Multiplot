@@ -18,7 +18,10 @@ shinyUI(fluidPage(
                          # get the data file
                          fileInput('file_input', 'Choose Input File',
                                    accept=c('text/txt', 'text/tsv')
-                         )
+                         ),
+                         
+                         # experiment IDs (from column 1-3) are transformed to meaningful names given in this file
+                         fileInput('file_translation', 'Choose Translation File')
                      ), # end of get data
 #==============================================================================
                      tabPanel( "Plot",

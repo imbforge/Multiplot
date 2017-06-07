@@ -68,6 +68,37 @@ shinyServer(function(input, output) {
         }
     })
     
+    # load translation table
+    translation.data <- reactive({
+        if (is.null(input$file_translation)) {return(NULL)}
+        read.table(file=input$file_translation$datapath, header=T, sep='\t', stringsAsFactors=FALSE)
+    })
+    
+    # name experiments in data table
+    all.data <- reactive({
+        # check the prerequisites
+        if (is.null(input$file_input)) { return(NULL) }
+        if (is.null(input$file_translation)) { return(raw.data()) }
+        
+        # name the experiments
+        t.data <- translation.data()
+        colnames(t.data) <- c("experiment","temp.experiment")
+        
+        # fuse the two tables, move added column to old "experiment" column and delete the added temp column
+        noname.data <- raw.data()
+        tmp.data <- merge( noname.data, t.data, by="experiment", all.x=TRUE )
+        
+        order.levels <- c( unique(t.data$temp.experiment), unique(tmp.data$experiment[is.na(tmp.data$temp.experiment)]) ) # use the same order for plotting that is found in the translation table and add all elements not found in that table at the end
+        
+        tmp.data$temp.experiment[is.na(tmp.data$temp.experiment)] <- tmp.data$experiment[is.na(tmp.data$temp.experiment)] # fix names of temp.experiment names that were generated as NA while merging
+        tmp.data$experiment <- factor(tmp.data$temp.experiment, levels=order.levels) # overwrite old experiment IDs
+        tmp.data$temp.experiment <- NULL # clean up
+        named.data <- tmp.data # re-create plot.data
+        rm(tmp.data) # clean more
+        return(named.data)
+    })
+    
+    
     
     ##################
     # User Interface #
@@ -89,33 +120,33 @@ shinyServer(function(input, output) {
     
     output$generate_column_name_x_axis_selector <- column2plot(id = "column_select_x_axis",
                                                       label = "Select a column to plot on x axis of selector",
-                                                      indata = raw.data())
+                                                      indata = all.data())
     
     output$generate_column_name_y_axis_selector <- column2plot(id = "column_select_y_axis",
                                                       label = "Select a column to plot on y axis of selector",
-                                                      indata = raw.data())
+                                                      indata = all.data())
     
     output$generate_column_name_z_axis_selector <- column2plot(id = "column_select_z_axis",
                                                       label = "Select a column to colour points in selector",
-                                                      indata = raw.data())
+                                                      indata = all.data())
     
     output$generate_column_name_x_axis_target <- column2plot(id = "column_target_x_axis",
                                                     label = "Select a column to plot on x axis of target",
-                                                    indata = raw.data())
+                                                    indata = all.data())
     
     output$generate_column_name_y_axis_target <- column2plot(id = "column_target_y_axis",
                                                     label = "Select a column to plot on y axis of target",
-                                                    indata = raw.data())
+                                                    indata = all.data())
     
     output$generate_column_name_z_axis_target <- column2plot(id = "column_target_z_axis",
                                                     label = "Select a column to colour points in target",
-                                                    indata = raw.data())
+                                                    indata = all.data())
     
-    output$generate_slider_z_axis_selector <- reactive(sliderInput("slider_z_axis_selector", 
-                                                                   "Select range to colour points",
-                                                                   value = c(0,1), 
-                                                                   min = min(raw.data()[,input$column_select_z_axis]), 
-                                                                   max = max(raw.data()[,input$column_select_z_axis])))
+    # output$generate_slider_z_axis_selector <- observe(sliderInput("slider_z_axis_selector", 
+    #                                                                "Select range to colour points",
+    #                                                                value = c(0,1), 
+    #                                                                min = min(raw.data()[,input$column_select_z_axis]), 
+    #                                                                max = max(raw.data()[,input$column_select_z_axis])))
     
     ##################
     # Plot functions #
@@ -134,7 +165,7 @@ shinyServer(function(input, output) {
     output$selectorPlot <- renderPlot({
         
         # get the plotting data (already pre-filtered by input$ parameters)
-        plot.data <- raw.data()
+        plot.data <- all.data()
         plot.data <- plot.data[,c(input$column_select_x_axis, 
                                   input$column_select_y_axis, 
                                   input$column_select_z_axis, 
@@ -163,7 +194,7 @@ shinyServer(function(input, output) {
     # this plot will show only those values selected in selectorPlot
     output$targetPlot <- renderPlot({
         
-        target.data <- brushedPoints(raw.data(), input$plot_brush)
+        target.data <- brushedPoints(all.data(), input$plot_brush)
         
         # empty plot, if no data is selected
         if (is.null(target.data) | is.null(input$column_target_x_axis) | is.null(input$column_target_y_axis)) { 
