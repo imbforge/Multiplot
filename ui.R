@@ -46,8 +46,11 @@ shinyUI(fluidPage(
                         checkboxInput("colorTargetPlot", 
                                       "Use third column to colour target", 
                                       value = FALSE),
-                        uiOutput("generate_column_name_z_axis_target")
+                        uiOutput("generate_column_name_z_axis_target"),
                         
+                        checkboxInput("facetTargetPlot",
+                                      "Split plot by experiment",
+                                      value = FALSE)
                     
                      ) # end of plotting parameters
             

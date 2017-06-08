@@ -217,15 +217,25 @@ shinyServer(function(input, output) {
             return( empty_plot("not enough data...") )
         }
         
+        
+        facetting <- NULL
+        
+        # check, if the target plot should be plotted by experiment
+        if (input$facetTargetPlot) {
+            facetting <- facet_wrap( ~ experiment, ncol = 2)
+        }
+        
         # plot selected data either with coloured points (by z axis) or not
         if (!input$colorTargetPlot) {
             ggplot(data = target.data,
                    aes_string(input$column_target_x_axis, input$column_target_y_axis)) +
-                geom_point()
+                geom_point() + 
+                facetting
         } else {
             ggplot(data = target.data,
                    aes_string(input$column_target_x_axis, input$column_target_y_axis, color=input$column_target_z_axis)) +
-                geom_point()
+                geom_point() +
+                facetting
         }
         
     })
