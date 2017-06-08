@@ -218,8 +218,6 @@ shinyServer(function(input, output) {
         target.data <- brushedPoints(all.data(), input$plot_brush)
         countExperiments <- length(unique(target.data$experiment))
         
-        print(countExperiments)
-        
         if (countExperiments > 2 & input$facetTargetPlot == TRUE){
             plotHeight <- paste0(400 * countExperiments, "px")
         }
