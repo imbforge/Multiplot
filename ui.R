@@ -33,12 +33,20 @@ shinyUI(fluidPage(
                                       value = FALSE),
                         uiOutput("generate_column_name_z_axis_selector"),
                         
+                        uiOutput("generate_min_z_axis"),
+                        uiOutput("generate_max_z_axis"),
+                        checkboxInput("controlLogScaleCheck",
+                                      "Log-scale colour scaling",
+                                      value = FALSE),
+                        
                         checkboxInput("controlExperimentCheck",
                                       "Use only one experiment as control for gating",
                                       value = FALSE),
                         uiOutput("generate_column_control_experiment"),
                         # uiOutput("generate_slider_z_axis_selector"),
                         
+                        
+                        #===========================================
                         # here there should be a horizontal line
                         
                         uiOutput("generate_column_name_x_axis_target"),

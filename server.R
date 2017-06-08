@@ -130,13 +130,6 @@ shinyServer(function(input, output) {
                                                       label = "Select a column to colour points in selector",
                                                       indata = all.data())
     
-    output$generate_column_control_experiment <- renderUI({
-                                                    selectInput("control_experiment",
-                                                                label = "Select an experiment as control",
-                                                                choices = all.data()$experiment,
-                                                                selected = all.data()$experiment[1])
-                                                    })
-    
     output$generate_column_name_x_axis_target <- column2plot(id = "column_target_x_axis",
                                                     label = "Select a column to plot on x axis of target",
                                                     indata = all.data())
@@ -149,6 +142,27 @@ shinyServer(function(input, output) {
                                                     label = "Select a column to colour points in target",
                                                     indata = all.data())
     
+    # select, which experiment should be used as "control" data set in select plot 
+    # to guide selection in target plot
+    output$generate_column_control_experiment <- renderUI({
+                                                    selectInput("control_experiment",
+                                                                label = "Select an experiment as control",
+                                                                choices = all.data()$experiment,
+                                                                selected = all.data()$experiment[1])
+                                                })
+    
+    
+    # input controls for max and min values for colour scaling
+    output$generate_min_z_axis <- renderUI({
+                                    numericInput("colour_select_min", 
+                                                 "Colour scale min value",
+                                                 value = min(as.numeric(as.character(all.data()[,input$colum_select_z_axis]))))
+                                  })
+    output$generate_max_z_axis <- renderUI({
+                                    numericInput("colour_select_max", 
+                                                 "Colour scale max value",
+                                                 value = max(as.numeric(as.character(all.data()[,input$colum_select_z_axis]))))
+                                  })
     
     
     # output$generate_slider_z_axis_selector <- observe(sliderInput("slider_z_axis_selector", 
@@ -193,7 +207,12 @@ shinyServer(function(input, output) {
             return( empty_plot("not enough data...") )
         }
         
-        # plot either with colouring of points or not - depending on seelcted z axis
+        colour_min <- input$colour_select_min
+        colour_max <- input$colour_selec_max
+        colour_log <- NULL
+        if (input$controlLogScaleCheck) {colour_log <- scale_colour_continuous(trans="log10")}
+        
+        # plot either with colouring of points or not - depending on selected z axis
         if (!input$colorPlot){
             ggplot(data = plot.data,
                    aes_string(input$column_select_x_axis, input$column_select_y_axis)) +
@@ -202,7 +221,8 @@ shinyServer(function(input, output) {
             ggplot(data = plot.data,
                    aes_string(input$column_select_x_axis, input$column_select_y_axis, color=input$column_select_z_axis)) +
                 geom_point() +
-                theme(legend.position = "bottom")
+                theme(legend.position = "bottom") +
+                colour_log
         }
         
     })
