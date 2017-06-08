@@ -208,6 +208,25 @@ shinyServer(function(input, output) {
     })
     
     # this plot will show only those values selected in selectorPlot
+    # create the plot dynamically will make sure the plot is always shown in a decent size
+    output$generate_targetPlot <- renderUI({
+        
+        # set a default height
+        plotHeight <- paste0(400, "px")
+        
+        # get the amount of experiments and determine the height by that
+        target.data <- brushedPoints(all.data(), input$plot_brush)
+        countExperiments <- length(unique(target.data$experiment))
+        
+        print(countExperiments)
+        
+        if (countExperiments > 2 & input$facetTargetPlot == TRUE){
+            plotHeight <- paste0(400 * countExperiments, "px")
+        }
+        
+        plotOutput("targetPlot", height = plotHeight)
+    })
+    
     output$targetPlot <- renderPlot({
         
         target.data <- brushedPoints(all.data(), input$plot_brush)
@@ -222,7 +241,7 @@ shinyServer(function(input, output) {
         
         # check, if the target plot should be plotted by experiment
         if (input$facetTargetPlot) {
-            facetting <- facet_wrap( ~ experiment, ncol = 2)
+            facetting <- facet_wrap( ~ experiment, ncol = 1)
         }
         
         # plot selected data either with coloured points (by z axis) or not
@@ -237,9 +256,6 @@ shinyServer(function(input, output) {
                 geom_point() +
                 facetting
         }
-        
-        # height = "1000px"
-        # width = 300
         
     }) # end renderPlot
 })

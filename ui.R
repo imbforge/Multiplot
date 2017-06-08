@@ -61,9 +61,7 @@ shinyUI(fluidPage(
     mainPanel(
        plotOutput("selectorPlot", brush = "plot_brush"),
        
-       plotOutput("targetPlot")
-       # plotOutput("targetPlot", height = "1000px")
-       # plotOutput("targetPlot")
+       uiOutput("generate_targetPlot")
     )
   )
 ))
