@@ -238,5 +238,8 @@ shinyServer(function(input, output) {
                 facetting
         }
         
-    })
+        # height = "1000px"
+        # width = 300
+        
+    }) # end renderPlot
 })
