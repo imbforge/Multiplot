@@ -178,7 +178,7 @@ shinyServer(function(input, output, session) {
     observe({
         if (is.null(all.data())) {return(NULL)}
         
-        if (is.null(input$column_select_z_axis)) {
+        if (is.null(input$column_select_z_axis ) | input$column_select_z_axis == "" ) {
             # min_value = NULL
             return()
         }
@@ -195,7 +195,7 @@ shinyServer(function(input, output, session) {
     observe({
         if (is.null(all.data())) {return(NULL)}
         
-        if (is.null(input$column_select_z_axis)) {
+        if (is.null(input$column_select_z_axis) | input$column_select_z_axis == "") {
             # max_value = NULL
             return()
         }
@@ -226,8 +226,16 @@ shinyServer(function(input, output, session) {
     output$selectorPlot <- renderPlot({
         
         # get an empty plot, if no data are available
-        if (is.null(all.data()) | is.null(input$column_select_x_axis) | is.null(input$column_select_y_axis)) { 
+        if (is.null(all.data()) | 
+            input$column_select_x_axis == "" | 
+            input$column_select_y_axis == "" |
+            input$column_select_z_axis == "" | 
+            input$column_target_x_axis == "" | 
+            input$column_target_y_axis == "" |
+            input$column_target_z_axis == "" ) { 
+            
             return( empty_plot("not enough data...") )
+            
         }
         
         # get the plotting data (already pre-filtered by input$ parameters)
@@ -299,7 +307,10 @@ shinyServer(function(input, output, session) {
         target.data <- brushedPoints(all.data(), input$plot_brush)
         
         # empty plot, if no data is selected
-        if (is.null(target.data) | is.null(input$column_target_x_axis) | is.null(input$column_target_y_axis)) { 
+        if (is.null(target.data) | 
+            input$column_target_x_axis == "" | 
+            input$column_target_y_axis == "" |
+            input$column_target_z_axis == "" ) { 
             return( empty_plot("not enough data...") )
         }
         
