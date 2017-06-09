@@ -13,7 +13,7 @@ library(shiny)
 options(shiny.maxRequestSize=500*1024^2) 
 
 # Define server logic required to draw a histogram
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
    
     ##################
     # Data functions #
@@ -153,23 +153,39 @@ shinyServer(function(input, output) {
     
     
     # input controls for max and min values for colour scaling
-    output$generate_min_z_axis <- renderUI({
-                                    numericInput("colour_select_min", 
-                                                 "Colour scale min value",
-                                                 value = min(as.numeric(as.character(all.data()[,input$colum_select_z_axis]))))
-                                  })
-    output$generate_max_z_axis <- renderUI({
-                                    numericInput("colour_select_max", 
-                                                 "Colour scale max value",
-                                                 value = max(as.numeric(as.character(all.data()[,input$colum_select_z_axis]))))
-                                  })
+    observe({
+        if (is.null(all.data())) {return(NULL)}
+        
+        if (is.null(input$column_select_z_axis)) {
+            # min_value = NULL
+            return()
+        }
+        else {
+            min_value = min(as.numeric(as.character(all.data()[,input$column_select_z_axis])), na.rm = TRUE)
+        }
+        
+        updateNumericInput(session, "colour_select_min", 
+                           label = "Colour scale min value", 
+                           value = min_value
+        ) # the minimum value of Colour legend
+    })
     
-    
-    # output$generate_slider_z_axis_selector <- observe(sliderInput("slider_z_axis_selector", 
-    #                                                                "Select range to colour points",
-    #                                                                value = c(0,1), 
-    #                                                                min = min(raw.data()[,input$column_select_z_axis]), 
-    #                                                                max = max(raw.data()[,input$column_select_z_axis])))
+    observe({
+        if (is.null(all.data())) {return(NULL)}
+        
+        if (is.null(input$column_select_z_axis)) {
+            # max_value = NULL
+            return()
+        }
+        else {
+            max_value = max(as.numeric(as.character(all.data()[,input$column_select_z_axis])), na.rm = TRUE)
+        }
+        
+        updateNumericInput(session, "colour_select_max", 
+                           label = "Colour scale max value", 
+                           value = max_value
+        ) # the maximum value of Colour legend
+    })
     
     ##################
     # Plot functions #
@@ -207,10 +223,13 @@ shinyServer(function(input, output) {
             return( empty_plot("not enough data...") )
         }
         
-        colour_min <- input$colour_select_min
-        colour_max <- input$colour_selec_max
         colour_log <- NULL
-        if (input$controlLogScaleCheck) {colour_log <- scale_colour_continuous(trans="log10")}
+        
+        if (input$controlLogScaleCheck) {
+            colour_log <- scale_colour_continuous(limits=c(input$colour_select_min, input$colour_select_max), trans="log10")
+        } else {
+            colour_log <- scale_colour_continuous(limits=c(input$colour_select_min, input$colour_select_max))
+            }
         
         # plot either with colouring of points or not - depending on selected z axis
         if (!input$colorPlot){
