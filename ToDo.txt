@@ -8,5 +8,6 @@
     - DT table
 - translation table usage
 - modify scaling and max/min values of z axis
+- modify the colours that are used in colour scaling
 
-- produce a good structure of the tool to make it more mainainable
+- produce a good structure of the tool to make it more maintainable
