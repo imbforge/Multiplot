@@ -117,39 +117,61 @@ shinyServer(function(input, output, session) {
     }
     
     # select, which column to plot (by name)
-    
-    output$generate_column_name_x_axis_selector <- column2plot(id = "column_select_x_axis",
-                                                      label = "Select a column to plot on x axis of selector",
-                                                      indata = all.data())
-    
-    output$generate_column_name_y_axis_selector <- column2plot(id = "column_select_y_axis",
-                                                      label = "Select a column to plot on y axis of selector",
-                                                      indata = all.data())
-    
-    output$generate_column_name_z_axis_selector <- column2plot(id = "column_select_z_axis",
-                                                      label = "Select a column to colour points in selector",
-                                                      indata = all.data())
-    
-    output$generate_column_name_x_axis_target <- column2plot(id = "column_target_x_axis",
-                                                    label = "Select a column to plot on x axis of target",
-                                                    indata = all.data())
-    
-    output$generate_column_name_y_axis_target <- column2plot(id = "column_target_y_axis",
-                                                    label = "Select a column to plot on y axis of target",
-                                                    indata = all.data())
-    
-    output$generate_column_name_z_axis_target <- column2plot(id = "column_target_z_axis",
-                                                    label = "Select a column to colour points in target",
-                                                    indata = all.data())
+    observe({
+        
+        available_colnames <- NULL
+        last_colname <- NULL
+        
+        if (!is.null(all.data())) {
+            available_colnames <- colnames(all.data())
+            last_colname <- available_colnames[1]
+        }
+        
+        updateSelectInput(session,
+                          "column_select_x_axis",
+                          label = "Select a column to plot on x axis of selector",
+                          choices = available_colnames,
+                          selected = last_colname)
+        
+        updateSelectInput(session,
+                          "column_select_y_axis",
+                          label = "Select a column to plot on y axis of selector",
+                          choices = available_colnames,
+                          selected = last_colname)
+        
+        updateSelectInput(session,
+                          "column_select_z_axis",
+                          label = "Select a column to plot on z axis of selector",
+                          choices = available_colnames,
+                          selected = last_colname)
+        
+        updateSelectInput(session,
+                          "column_target_x_axis",
+                          label = "Select a column to plot on x axis of target",
+                          choices = available_colnames,
+                          selected = last_colname)
+        
+        updateSelectInput(session,
+                          "column_target_y_axis",
+                          label = "Select a column to plot on y axis of target",
+                          choices = available_colnames,
+                          selected = last_colname)
+        
+        updateSelectInput(session,
+                          "column_target_z_axis",
+                          label = "Select a column to plot on z axis of target",
+                          choices = available_colnames,
+                          selected = last_colname)
+    })
     
     # select, which experiment should be used as "control" data set in select plot 
     # to guide selection in target plot
-    output$generate_column_control_experiment <- renderUI({
-                                                    selectInput("control_experiment",
-                                                                label = "Select an experiment as control",
-                                                                choices = all.data()$experiment,
-                                                                selected = all.data()$experiment[1])
-                                                })
+    observe({
+        updateSelectInput(session, "control_experiment",
+                    label = "Select an experiment as control",
+                    choices = all.data()$experiment,
+                    selected = all.data()$experiment[1])
+    })
     
     
     # input controls for max and min values for colour scaling
@@ -203,6 +225,11 @@ shinyServer(function(input, output, session) {
     # this plot will serve as the selector for the target plot
     output$selectorPlot <- renderPlot({
         
+        # get an empty plot, if no data are available
+        if (is.null(all.data()) | is.null(input$column_select_x_axis) | is.null(input$column_select_y_axis)) { 
+            return( empty_plot("not enough data...") )
+        }
+        
         # get the plotting data (already pre-filtered by input$ parameters)
         plot.data <- all.data()
         plot.data <- plot.data[,c("experiment",
@@ -218,10 +245,7 @@ shinyServer(function(input, output, session) {
             plot.data <- plot.data[plot.data$experiment == input$control_experiment, ]
         }
         
-        # get an empty plot, if no data are available
-        if (is.null(plot.data) | is.null(input$column_select_x_axis) | is.null(input$column_select_y_axis)) { 
-            return( empty_plot("not enough data...") )
-        }
+        
         
         colour_log <- NULL
         
@@ -265,6 +289,10 @@ shinyServer(function(input, output, session) {
     })
     
     output$targetPlot <- renderPlot({
+        
+        if (is.null(all.data())) {
+            return( empty_plot("not enough data...") )
+        }
         
         target.data <- brushedPoints(all.data(), input$plot_brush)
         
