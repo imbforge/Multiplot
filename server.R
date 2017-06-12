@@ -259,10 +259,10 @@ shinyServer(function(input, output, session) {
         
         if (input$controlLogScaleCheck) {
             colour_log <- scale_colour_continuous(low = input$colour_select_min_colour, high = input$colour_select_max_colour,
-                                                  limits=c(input$colour_select_min, input$colour_select_max), trans="log10")
+                                                  limits=c(input$colour_select_min, input$colour_select_max), oob = squish, trans="log10") #, oob=squish
         } else {
             colour_log <- scale_colour_continuous(low = input$colour_select_min_colour, high = input$colour_select_max_colour,
-                                                  limits=c(input$colour_select_min, input$colour_select_max))
+                                                  limits=c(input$colour_select_min, input$colour_select_max), oob = squish) #, oob=squish(?????)
             }
         
         # plot either with colouring of points or not - depending on selected z axis

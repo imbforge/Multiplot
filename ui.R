@@ -1,7 +1,8 @@
 # This app is supposed to plot multiple data sets based on the selection of another plot
 library(shiny)
-library(shinyjs)
+library(shinyjs) # deprecated - sould be colourpicker
 library(ggplot2)
+library(scales) # to use sqish
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
@@ -55,11 +56,11 @@ shinyUI(fluidPage(
                                      value = 100),
                         colourInput("colour_select_min_colour",
                                     "Choose a colour for gradient min",
-                                    value = "#CCCCCC",
+                                    value = "#FF0000",
                                     palette = "limited"),
                         colourInput("colour_select_max_colour",
                                     "Choose a colour for gradient max",
-                                    value = "#3333CC",
+                                    value = "#0000FF",
                                     palette = "limited"),
                         checkboxInput("controlLogScaleCheck",
                                       "Log-scale colour scaling",
