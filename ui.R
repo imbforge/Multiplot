@@ -1,6 +1,6 @@
 # This app is supposed to plot multiple data sets based on the selection of another plot
+library(colourpicker)
 library(shiny)
-library(shinyjs) # deprecated - sould be colourpicker
 library(ggplot2)
 library(scales) # to use sqish
 
