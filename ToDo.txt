@@ -1,13 +1,17 @@
 # requirements to GatingPlotter
 
 - show Density Plot
-- be able to select, which experiment is shown in selector plot
+- (done) be able to select, which experiment is shown in selector plot 
     - (to identify the control experiment and select on that)
 - show secondary plot and table by experiment 
-    - facet_wrap?
+    -(done) facet_wrap?
     - DT table
-- translation table usage
-- modify scaling and max/min values of z axis
-- modify the colours that are used in colour scaling
+    - make filterd data downloadable
+- (done)translation table usage
+- (done)modify scaling and max/min values of z axis
+- (done)modify the colours that are used in colour scaling
+
 
 - produce a good structure of the tool to make it more maintainable
+
+- clean up user interface
