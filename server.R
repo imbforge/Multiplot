@@ -19,6 +19,8 @@ options(shiny.maxRequestSize=500*1024^2)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
+    
+    global_select_plot <- NULL
    
     ##################
     # Data functions #
@@ -110,17 +112,6 @@ shinyServer(function(input, output, session) {
     ##################
     
     # generate a drop down list from input data column names
-    column2plot <- function(id, label, indata) {
-        renderUI({
-            
-            selectInput(id, 
-                        label=label,  
-                        choices=names(indata),
-                        selected=names(indata)[length(indata)]
-            )
-        })
-    }
-    
     # select, which column to plot (by name)
     observe({
         
@@ -189,30 +180,20 @@ shinyServer(function(input, output, session) {
         }
         else {
             min_value = min(as.numeric(as.character(all.data()[,input$column_select_z_axis])), na.rm = TRUE)
+            max_value = max(as.numeric(as.character(all.data()[,input$column_select_z_axis])), na.rm = TRUE)
         }
         
         updateNumericInput(session, "colour_select_min", 
                            label = "Colour scale min value", 
                            value = min_value
         ) # the minimum value of Colour legend
-    })
-    
-    observe({
-        if (is.null(all.data())) {return(NULL)}
-        
-        if (is.null(input$column_select_z_axis) | input$column_select_z_axis == "") {
-            # max_value = NULL
-            return()
-        }
-        else {
-            max_value = max(as.numeric(as.character(all.data()[,input$column_select_z_axis])), na.rm = TRUE)
-        }
         
         updateNumericInput(session, "colour_select_max", 
                            label = "Colour scale max value", 
                            value = max_value
         ) # the maximum value of Colour legend
     })
+    
     
     ##################
     # Plot functions #
@@ -229,7 +210,11 @@ shinyServer(function(input, output, session) {
     
     # this plot will serve as the selector for the target plot
     output$selectorPlot <- renderPlot({
-        
+        print(f.selectorPlot())
+    })
+    
+    # wrap the plot in an extra function to make it available as download
+    f.selectorPlot <- function(){
         # get an empty plot, if no data are available
         if (is.null(all.data()) | 
             input$column_select_x_axis == "" | 
@@ -272,28 +257,36 @@ shinyServer(function(input, output, session) {
         
         # plot either with colouring of points or not - depending on selected z axis
         if (!input$colorPlot){
-            ggplot(data = plot.data,
+            p.select <- ggplot(data = plot.data,
                    aes_string(input$column_select_x_axis, input$column_select_y_axis)) +
                 geom_point()
         } else {
-            ggplot(data = plot.data,
+            p.select <- ggplot(data = plot.data,
                    aes_string(input$column_select_x_axis, input$column_select_y_axis, color=input$column_select_z_axis)) +
                 geom_point() +
                 theme(legend.position = "bottom") +
                 colour_log
         }
         
-    })
+        return(p.select)
+        
+    } # end f.selectorPlot
     
     # this plot will show only those values selected in selectorPlot
     # create the plot dynamically will make sure the plot is always shown in a decent size
-    output$generate_targetPlot <- renderUI({
+    output$generate_targetPlotArea <- renderUI({
         
         # set a default height
         plotHeight <- paste0(400, "px")
         
         # get the amount of experiments and determine the height by that
-        target.data <- brushedPoints(all.data(), input$plot_brush)
+        target.data <- brushedPoints(df = all.data(), 
+                                     brush = input$plot_brush,
+                                     xvar = input$column_select_x_axis,
+                                     yvar = input$column_select_y_axis)
+        
+        print(head(target.data))
+        
         countExperiments <- length(unique(target.data$experiment))
         
         if (countExperiments > 2 & input$facetTargetPlot == TRUE){
@@ -304,12 +297,22 @@ shinyServer(function(input, output, session) {
     })
     
     output$targetPlot <- renderPlot({
+        print(f.targetPlot())
+    })
+    
+    f.targetPlot <- function(){
         
         if (is.null(all.data())) {
             return( empty_plot("not enough data...") )
         }
         
-        target.data <- brushedPoints(all.data(), input$plot_brush)
+        print("debug")
+        print(input$plot_brush)
+        
+        target.data <- brushedPoints(df = all.data(), 
+                                     brush = input$plot_brush, 
+                                     xvar = input$column_select_x_axis, 
+                                     yvar = input$column_select_y_axis)
         
         # empty plot, if no data is selected
         if (is.null(target.data) | 
@@ -329,16 +332,35 @@ shinyServer(function(input, output, session) {
         
         # plot selected data either with coloured points (by z axis) or not
         if (!input$colorTargetPlot) {
-            ggplot(data = target.data,
+            p.target <- ggplot(data = target.data,
                    aes_string(input$column_target_x_axis, input$column_target_y_axis)) +
                 geom_point() + 
                 facetting
         } else {
-            ggplot(data = target.data,
+            p.target <- ggplot(data = target.data,
                    aes_string(input$column_target_x_axis, input$column_target_y_axis, color=input$column_target_z_axis)) +
                 geom_point() +
                 facetting
         }
         
-    }) # end renderPlot
+        return(p.target)
+        
+    } # end targetPlot
+    
+    # magic behind the download plot button
+    output$downloadSelectPlot <- downloadHandler(
+        filename = "select_plot.pdf",
+        content = function(file) {
+            # write pdf of ggplot
+            ggsave(filename=file, plot = f.selectorPlot(), device = 'pdf', width=200, height=150, unit="mm")
+        }
+    )
+    
+    output$downloadTargetPlot <- downloadHandler(
+        filename = "target_plot.pdf",
+        content = function(file) {
+            # write pdf of ggplot
+            ggsave(filename=file, plot = f.targetPlot(), device = 'pdf', width=200, height=150, unit="mm")
+        }
+    )
 })

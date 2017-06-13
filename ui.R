@@ -109,7 +109,15 @@ shinyUI(fluidPage(
                         
                         checkboxInput("facetTargetPlot",
                                       "Split plot by experiment",
-                                      value = FALSE)
+                                      value = FALSE),
+                        
+                        #=================================================
+                        # here there should be another horizontal line
+                        
+                        # download the plot
+                        downloadButton('downloadSelectPlot', 'Download Select Plot (PDF)'),
+                        
+                        downloadButton('downloadTargetPlot', 'Download Target Plot (PDF)')
                     
                      ) # end of plotting parameters
             
@@ -120,7 +128,7 @@ shinyUI(fluidPage(
     mainPanel(
        plotOutput("selectorPlot", brush = "plot_brush"),
        
-       uiOutput("generate_targetPlot")
+       uiOutput("generate_targetPlotArea")
     )
   )
 ))
