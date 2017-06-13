@@ -7,7 +7,12 @@
 #    http://shiny.rstudio.com/
 #
 
-library(shiny)
+if(require(shiny)){
+    library("shiny")
+} else {
+    install.packages("shiny")
+}
+
 
 # enable file uploads up to 500MB
 options(shiny.maxRequestSize=500*1024^2) 

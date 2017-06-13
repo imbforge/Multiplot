@@ -1,8 +1,16 @@
 # This app is supposed to plot multiple data sets based on the selection of another plot
-library(colourpicker)
-library(shiny)
-library(ggplot2)
-library(scales) # to use sqish
+check2install <- function(pax){
+    if (require(pax)){
+        library(pax)
+    } else {
+        installed.packages(pax)
+    }
+}
+
+check2install("colourpicker") # for colourInput
+check2install("shiny")
+check2install("ggplot2")
+check2install("scales") # to use sqish
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
