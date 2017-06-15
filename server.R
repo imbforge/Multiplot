@@ -176,22 +176,41 @@ shinyServer(function(input, output, session) {
         
         if (is.null(input$column_select_z_axis ) | input$column_select_z_axis == "" ) {
             # min_value = NULL
-            return()
-        }
-        else {
+            # don't do anything
+        } else {
             min_value = min(as.numeric(as.character(all.data()[,input$column_select_z_axis])), na.rm = TRUE)
             max_value = max(as.numeric(as.character(all.data()[,input$column_select_z_axis])), na.rm = TRUE)
-        }
+            
+            
+            updateNumericInput(session, "colour_select_min", 
+                               label = "Colour scale min value", 
+                               value = min_value
+            ) # the minimum value of Colour legend
+            
+            updateNumericInput(session, "colour_select_max", 
+                               label = "Colour scale max value", 
+                               value = max_value
+            ) # the maximum value of Colour legend
+        } # end if
         
-        updateNumericInput(session, "colour_select_min", 
-                           label = "Colour scale min value", 
-                           value = min_value
-        ) # the minimum value of Colour legend
-        
-        updateNumericInput(session, "colour_select_max", 
-                           label = "Colour scale max value", 
-                           value = max_value
-        ) # the maximum value of Colour legend
+        if (is.null(input$column_target_z_axis ) | input$column_target_z_axis == "" ) {
+            # min_value = NULL
+            # don't do anything
+        } else {
+            min_value = min(as.numeric(as.character(all.data()[,input$column_target_z_axis])), na.rm = TRUE)
+            max_value = max(as.numeric(as.character(all.data()[,input$column_target_z_axis])), na.rm = TRUE)
+            
+            
+            updateNumericInput(session, "colour_target_min", 
+                               label = "Colour scale min value", 
+                               value = min_value
+            ) # the minimum value of Colour legend
+            
+            updateNumericInput(session, "colour_target_max", 
+                               label = "Colour scale max value", 
+                               value = max_value
+            ) # the maximum value of Colour legend
+        } # end if
     })
     
     
@@ -210,7 +229,7 @@ shinyServer(function(input, output, session) {
     
     # this plot will serve as the selector for the target plot
     output$selectorPlot <- renderPlot({
-        print(f.selectorPlot())
+        f.selectorPlot()
     })
     
     # wrap the plot in an extra function to make it available as download
@@ -247,7 +266,7 @@ shinyServer(function(input, output, session) {
         
         colour_log <- NULL
         
-        if (input$controlLogScaleCheck) {
+        if (input$controlSelectLogScaleCheck) {
             colour_log <- scale_colour_continuous(low = input$colour_select_min_colour, high = input$colour_select_max_colour,
                                                   limits=c(input$colour_select_min, input$colour_select_max), oob = squish, trans="log10") #, oob=squish
         } else {
@@ -281,11 +300,8 @@ shinyServer(function(input, output, session) {
         
         # get the amount of experiments and determine the height by that
         target.data <- brushedPoints(df = all.data(), 
-                                     brush = input$plot_brush,
-                                     xvar = input$column_select_x_axis,
-                                     yvar = input$column_select_y_axis)
+                                     brush = input$plot_brush)
         
-        print(head(target.data))
         
         countExperiments <- length(unique(target.data$experiment))
         
@@ -297,7 +313,7 @@ shinyServer(function(input, output, session) {
     })
     
     output$targetPlot <- renderPlot({
-        print(f.targetPlot())
+        f.targetPlot()
     })
     
     f.targetPlot <- function(){
@@ -306,13 +322,15 @@ shinyServer(function(input, output, session) {
             return( empty_plot("not enough data...") )
         }
         
-        print("debug")
-        print(input$plot_brush)
+        # print("debug")
+        # print(input$plot_brush)
         
         target.data <- brushedPoints(df = all.data(), 
-                                     brush = input$plot_brush, 
-                                     xvar = input$column_select_x_axis, 
-                                     yvar = input$column_select_y_axis)
+                                     brush = input$plot_brush)
+        
+        print(input$plot_brush)
+        
+        print(target.data)
         
         # empty plot, if no data is selected
         if (is.null(target.data) | 
@@ -330,7 +348,18 @@ shinyServer(function(input, output, session) {
             facetting <- facet_wrap( ~ experiment, ncol = 1)
         }
         
+        colour_log <- NULL
+        
+        if (input$controlTargetLogScaleCheck) {
+            colour_log <- scale_colour_continuous(low = input$colour_target_min_colour, high = input$colour_target_max_colour,
+                                                  limits=c(input$colour_target_min, input$colour_target_max), oob = squish, trans="log10") #, oob=squish
+        } else {
+            colour_log <- scale_colour_continuous(low = input$colour_target_min_colour, high = input$colour_target_max_colour,
+                                                  limits=c(input$colour_target_min, input$colour_target_max), oob = squish) #, oob=squish(?????)
+        }
+        
         # plot selected data either with coloured points (by z axis) or not
+        # make sure to have either log scaled colour scale from above or linear scaling
         if (!input$colorTargetPlot) {
             p.target <- ggplot(data = target.data,
                    aes_string(input$column_target_x_axis, input$column_target_y_axis)) +
@@ -340,7 +369,9 @@ shinyServer(function(input, output, session) {
             p.target <- ggplot(data = target.data,
                    aes_string(input$column_target_x_axis, input$column_target_y_axis, color=input$column_target_z_axis)) +
                 geom_point() +
-                facetting
+                colour_log +
+                facetting +
+                theme(legend.position = "bottom")
         }
         
         return(p.target)
@@ -357,10 +388,24 @@ shinyServer(function(input, output, session) {
     )
     
     output$downloadTargetPlot <- downloadHandler(
+        
         filename = "target_plot.pdf",
         content = function(file) {
+            # get the amount of experiments and determine the height by that
+            target.data <- brushedPoints(df = all.data(), 
+                                         brush = input$plot_brush)
+            
+            
+            countExperiments <- length(unique(target.data$experiment))
+            
+            if (countExperiments > 2 & input$facetTargetPlot == TRUE){
+                plotHeight <- 75 * countExperiments
+            } else {
+                plotHeight <- 75
+            }
+            
             # write pdf of ggplot
-            ggsave(filename=file, plot = f.targetPlot(), device = 'pdf', width=200, height=150, unit="mm")
+            ggsave(filename=file, plot = f.targetPlot(), device = 'pdf', width=100, height=plotHeight, unit="mm", limitsize = FALSE)
         }
     )
 })
