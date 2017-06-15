@@ -17,6 +17,7 @@ if(require(shiny)){
 
 # enable file uploads up to 500MB
 options(shiny.maxRequestSize=500*1024^2) 
+options(stringsAsFactors = FALSE)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
