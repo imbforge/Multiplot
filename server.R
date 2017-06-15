@@ -11,6 +11,7 @@ if(require(shiny)){
     library("shiny")
 } else {
     install.packages("shiny")
+    library("shiny")
 }
 
 

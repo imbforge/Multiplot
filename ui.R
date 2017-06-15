@@ -1,10 +1,24 @@
 # This app is supposed to plot multiple data sets based on the selection of another plot
 
-if(!require("colourpicker")) {install.packages("colourpicker")} # for colourInput
-if(!require("ggplot2")) {install.packages("ggplot2")}
-if(!require("scales")) {install.packages("scales")} # for oob=squish
-if(!require("shiny")) {install.packages("shiny")} 
+if(!require("colourpicker")) {
+    install.packages("colourpicker")
+    library("colourpicker")
+} # for colourInput
 
+if (!require("ggplot2")) {
+    install.packages("ggplot2")
+    library("ggplot2")
+}
+
+if (!require("scales")) {
+    install.packages("scales")
+    library("scales")
+} # for oob=squish
+
+if (!require("shiny")) {
+    install.packages("shiny")
+    library("shiny")
+}
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
