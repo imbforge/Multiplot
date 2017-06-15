@@ -328,10 +328,6 @@ shinyServer(function(input, output, session) {
         target.data <- brushedPoints(df = all.data(), 
                                      brush = input$plot_brush)
         
-        print(input$plot_brush)
-        
-        print(target.data)
-        
         # empty plot, if no data is selected
         if (is.null(target.data) | 
             input$column_target_x_axis == "" | 
