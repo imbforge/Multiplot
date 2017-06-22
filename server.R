@@ -165,8 +165,8 @@ shinyServer(function(input, output, session) {
     observe({
         updateSelectInput(session, "control_experiment",
                     label = "Select an experiment as control",
-                    choices = all.data()$experiment,
-                    selected = all.data()$experiment[1])
+                    choices = as.character(all.data()$experiment),
+                    selected = as.character(all.data()$experiment[1]))
     })
     
     
