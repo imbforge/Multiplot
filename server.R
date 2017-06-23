@@ -92,7 +92,7 @@ shinyServer(function(input, output, session) {
         order.levels <- c( unique(t.data$temp.experiment), unique(tmp.data$experiment[is.na(tmp.data$temp.experiment)]) ) # use the same order for plotting that is found in the translation table and add all elements not found in that table at the end
         
         tmp.data$temp.experiment[is.na(tmp.data$temp.experiment)] <- tmp.data$experiment[is.na(tmp.data$temp.experiment)] # fix names of temp.experiment names that were generated as NA while merging
-        tmp.data$experiment <- factor(tmp.data$temp.experiment, levels=order.levels) # overwrite old experiment IDs
+        tmp.data$experiment <- tmp.data$temp.experiment[order(tmp.data$temp.experiment)] # overwrite old experiment IDs
         tmp.data$temp.experiment <- NULL # clean up
         named.data <- tmp.data # re-create plot.data
         rm(tmp.data) # clean more
@@ -110,48 +110,48 @@ shinyServer(function(input, output, session) {
     observe({
         
         available_colnames <- NULL
-        last_colname <- NULL
+        first_colname <- NULL
         
         if (!is.null(all.data())) {
             available_colnames <- colnames(all.data())
-            last_colname <- available_colnames[1]
+            first_colname <- available_colnames[1]
         }
         
         updateSelectInput(session,
                           "column_select_x_axis",
                           label = "Select a column to plot on x axis of selector",
                           choices = available_colnames,
-                          selected = last_colname)
+                          selected = first_colname)
         
         updateSelectInput(session,
                           "column_select_y_axis",
                           label = "Select a column to plot on y axis of selector",
                           choices = available_colnames,
-                          selected = last_colname)
+                          selected = first_colname)
         
         updateSelectInput(session,
                           "column_select_z_axis",
                           label = "Select a column to plot on z axis of selector",
                           choices = available_colnames,
-                          selected = last_colname)
+                          selected = first_colname)
         
         updateSelectInput(session,
                           "column_target_x_axis",
                           label = "Select a column to plot on x axis of target",
                           choices = available_colnames,
-                          selected = last_colname)
+                          selected = first_colname)
         
         updateSelectInput(session,
                           "column_target_y_axis",
                           label = "Select a column to plot on y axis of target",
                           choices = available_colnames,
-                          selected = last_colname)
+                          selected = first_colname)
         
         updateSelectInput(session,
                           "column_target_z_axis",
                           label = "Select a column to plot on z axis of target",
                           choices = available_colnames,
-                          selected = last_colname)
+                          selected = first_colname)
     })
     
     # select, which experiment should be used as "control" data set in select plot 
@@ -160,7 +160,9 @@ shinyServer(function(input, output, session) {
         updateSelectInput(session, "control_experiment",
                     label = "Select an experiment as control",
                     choices = as.character(all.data()$experiment),
-                    selected = as.character(all.data()$experiment[1]))
+                    selected = as.character(all.data()$experiment)[1]
+                    )
+
     })
     
     
@@ -172,8 +174,17 @@ shinyServer(function(input, output, session) {
             # min_value = NULL
             # don't do anything
         } else {
-            min_value = min(as.numeric(as.character(all.data()[,input$column_select_z_axis])), na.rm = TRUE)
-            max_value = max(as.numeric(as.character(all.data()[,input$column_select_z_axis])), na.rm = TRUE)
+            # check, if all elements in vector are numeric - replace with NA
+            tmp <- all.data()[,input$column_select_z_axis]
+            tmp[!sapply(tmp, is.numeric, USE.NAMES = F)] <- NA
+            
+            if (all(is.na(tmp))) {
+                min_value <- 0
+                max_value <- 1
+            } else {
+                min_value = min(tmp, na.rm = TRUE)
+                max_value = max(tmp, na.rm = TRUE)
+            }
             
             
             updateNumericInput(session, "colour_select_min", 
@@ -191,8 +202,17 @@ shinyServer(function(input, output, session) {
             # min_value = NULL
             # don't do anything
         } else {
-            min_value = min(as.numeric(as.character(all.data()[,input$column_target_z_axis])), na.rm = TRUE)
-            max_value = max(as.numeric(as.character(all.data()[,input$column_target_z_axis])), na.rm = TRUE)
+            # check, if all elements in vector are numeric - replace with NA
+            tmp <- all.data()[,input$column_target_z_axis]
+            tmp[!sapply(tmp, is.numeric, USE.NAMES = FALSE)] <- NA
+            
+            if (all(is.na(tmp))) {
+                min_value <- 0
+                max_value <- 1
+            } else {
+                min_value = min(tmp, na.rm = TRUE)
+                max_value = max(tmp, na.rm = TRUE)
+            }
             
             
             updateNumericInput(session, "colour_target_min", 
