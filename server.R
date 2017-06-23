@@ -174,7 +174,7 @@ shinyServer(function(input, output, session) {
         } else {
             # check, if all elements in vector are numeric - replace with NA
             tmp <- all.data()[,input$column_select_z_axis]
-            tmp[!sapply(tmp, is.numeric)] <- NA
+            tmp[!sapply(tmp, is.numeric, USE.NAMES = F)] <- NA
             
             if (all(is.na(tmp))) {
                 min_value <- 0
@@ -202,7 +202,7 @@ shinyServer(function(input, output, session) {
         } else {
             # check, if all elements in vector are numeric - replace with NA
             tmp <- all.data()[,input$column_target_z_axis]
-            tmp[!sapply(tmp, is.numeric)] <- NA
+            tmp[!sapply(tmp, is.numeric, USE.NAMES = FALSE)] <- NA
             
             if (all(is.na(tmp))) {
                 min_value <- 0
