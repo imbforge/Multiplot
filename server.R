@@ -15,7 +15,7 @@ options(stringsAsFactors = FALSE)
 shinyServer(function(input, output, session) {
     
     global_select_plot <- NULL
-   
+    
     ##################
     # Data functions #
     ##################
@@ -158,9 +158,9 @@ shinyServer(function(input, output, session) {
     # to guide selection in target plot
     observe({
         updateSelectInput(session, "control_experiment",
-                    label = "Select an experiment as control",
-                    choices = as.character(all.data()$experiment),
-                    selected = as.character(all.data()$experiment)[1])
+                          label = "Select an experiment as control",
+                          choices = as.character(all.data()$experiment),
+                          selected = as.character(all.data()$experiment)[1])
     })
     
     
@@ -284,17 +284,27 @@ shinyServer(function(input, output, session) {
         } else {
             colour_log <- scale_colour_continuous(low = input$colour_select_min_colour, high = input$colour_select_max_colour,
                                                   limits=c(input$colour_select_min, input$colour_select_max), oob = squish) #, oob=squish(?????)
-            }
+        }
+        
+        
+        # set theme_bw, if white background is wanted
+        white_background <- NULL
+        
+        if (input$background_theme) {
+            white_background <- theme_bw()
+        }
         
         # plot either with colouring of points or not - depending on selected z axis
         if (!input$colorPlot){
             p.select <- ggplot(data = plot.data,
-                   aes_string(input$column_select_x_axis, input$column_select_y_axis)) +
-                geom_point()
+                               aes_string(input$column_select_x_axis, input$column_select_y_axis)) +
+                geom_point() +
+                white_background
         } else {
             p.select <- ggplot(data = plot.data,
-                   aes_string(input$column_select_x_axis, input$column_select_y_axis, color=input$column_select_z_axis)) +
+                               aes_string(input$column_select_x_axis, input$column_select_y_axis, color=input$column_select_z_axis)) +
                 geom_point() +
+                white_background + # it is important to call legend.position later, because theme_bw() would override the setting
                 theme(legend.position = "bottom") +
                 colour_log
         }
@@ -363,22 +373,31 @@ shinyServer(function(input, output, session) {
                                                   limits=c(input$colour_target_min, input$colour_target_max), oob = squish, trans="log10") #, oob=squish
         } else {
             colour_log <- scale_colour_continuous(low = input$colour_target_min_colour, high = input$colour_target_max_colour,
-                                                  limits=c(input$colour_target_min, input$colour_target_max), oob = squish) #, oob=squish(?????)
+                                                  limits=c(input$colour_target_min, input$colour_target_max), oob = squish)
+        }
+        
+        # set theme_bw, if white background is wanted
+        white_background <- NULL
+        
+        if (input$background_theme) {
+            white_background <- theme_bw()
         }
         
         # plot selected data either with coloured points (by z axis) or not
         # make sure to have either log scaled colour scale from above or linear scaling
         if (!input$colorTargetPlot) {
             p.target <- ggplot(data = target.data,
-                   aes_string(input$column_target_x_axis, input$column_target_y_axis)) +
+                               aes_string(input$column_target_x_axis, input$column_target_y_axis)) +
                 geom_point() + 
-                facetting
+                facetting +
+                white_background
         } else {
             p.target <- ggplot(data = target.data,
-                   aes_string(input$column_target_x_axis, input$column_target_y_axis, color=input$column_target_z_axis)) +
+                               aes_string(input$column_target_x_axis, input$column_target_y_axis, color=input$column_target_z_axis)) +
                 geom_point() +
                 colour_log +
                 facetting +
+                white_background +
                 theme(legend.position = "bottom")
         }
         

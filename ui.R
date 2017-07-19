@@ -41,6 +41,18 @@ shinyUI(fluidPage(
                                    fileInput('file_translation', 'Choose Translation File')
                          ), # end of get data
                          #==============================================================================
+                         tabPanel( "Options",
+                                   checkboxInput("background_theme",
+                                                 "Show white background",
+                                                 value = FALSE),
+                                   selectInput("sample_select",
+                                               label = "Select samples to plot",
+                                               choices = NULL,
+                                               selected = NULL,
+                                               multiple = TRUE
+                                               )
+                         ), # end of options 
+                         #==============================================================================
                          tabPanel( "Gate",
                                    # get the parameters to plot
                                    # uiOutput("generate_column_name_x_axis_selector"),
