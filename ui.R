@@ -45,6 +45,7 @@ shinyUI(fluidPage(
                                    checkboxInput("background_theme",
                                                  "Show white background",
                                                  value = FALSE),
+                                   
                                    selectInput("sample_select",
                                                label = "Select samples to plot",
                                                choices = NULL,

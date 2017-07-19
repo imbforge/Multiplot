@@ -152,6 +152,7 @@ shinyServer(function(input, output, session) {
                           label = "Select a column to plot on z axis of target",
                           choices = available_colnames,
                           selected = first_colname)
+        
     })
     
     # select, which experiment should be used as "control" data set in select plot 
@@ -163,6 +164,15 @@ shinyServer(function(input, output, session) {
                           selected = as.character(all.data()$experiment)[1])
     })
     
+    
+    # choose, which experiments to plot in target plot
+    observe({
+        updateSelectInput(session,
+                          "sample_select",
+                          label = "Select samples to plot",
+                          choices = as.character(all.data()$experiment),
+                          selected = as.character(all.data()$experiment)[1])
+    })
     
     # input controls for max and min values for colour scaling
     observe({
@@ -324,6 +334,9 @@ shinyServer(function(input, output, session) {
         target.data <- brushedPoints(df = all.data(), 
                                      brush = input$plot_brush)
         
+        if(!is.null(input$sample_select)){
+            target.data <- target.data[target.data$experiment %in% input$sample_select, ]
+        }
         
         countExperiments <- length(unique(target.data$experiment))
         
@@ -344,11 +357,13 @@ shinyServer(function(input, output, session) {
             return( empty_plot("not enough data...") )
         }
         
-        # print("debug")
-        # print(input$plot_brush)
         
         target.data <- brushedPoints(df = all.data(), 
                                      brush = input$plot_brush)
+        
+        if(!is.null(input$sample_select)){
+            target.data <- target.data[target.data$experiment %in% input$sample_select, ]
+        }
         
         # empty plot, if no data is selected
         if (is.null(target.data) | 
